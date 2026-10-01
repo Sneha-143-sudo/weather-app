@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A modern, responsive Weather App created with HTML5, CSS3, and Vanilla JavaScript. Search weather conditions and 5-day forecasts for any city." />
+  <meta name="author" content="Sneha Dhamane" />
+  <title>Weather App 🌤️ | Live Weather & 5-Day Forecast</title>
+
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-dark weather-clear-day">
+  <!-- Dynamic Background Particle / Glow Layer -->
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="header">
+    <nav class="navbar" id="navbar" aria-label="Main Navigation">
+      <div class="nav-brand">
+        <a href="#hero" class="brand-link">
+          <span class="brand-icon">🌤️</span>
+          <span class="brand-title">Weather App</span>
+        </a>
+      </div>
+
+      <!-- Desktop Navigation Links -->
+      <ul class="nav-menu" id="nav-menu">
+        <li class="nav-item">
+          <a href="#hero" class="nav-link active">Home</a>
+        </li>
+        <li class="nav-item">
+          <a href="#forecast-section" class="nav-link">Forecast</a>
+        </li>
+        <li class="nav-item">
+          <a href="#recent-section" class="nav-link">Recent Searches</a>
+        </li>
+        <li class="nav-item">
+          <a href="#about-section" class="nav-link">About</a>
+        </li>
+      </ul>
+
+      <!-- Navbar Actions: Unit Toggle & Theme Toggle -->
+      <div class="nav-actions">
+        <!-- Celsius / Fahrenheit Toggle -->
+        <button id="unit-toggle-btn" class="unit-toggle" aria-label="Toggle Temperature Unit" title="Toggle Celsius / Fahrenheit">
+          <span class="unit-option unit-c active">°C</span>
+          <span class="unit-divider">|</span>
+          <span class="unit-option unit-f">°F</span>
+        </button>
+
+        <!-- Dark / Light Theme Toggle -->
+        <button id="theme-toggle-btn" class="theme-toggle" aria-label="Toggle Dark and Light Mode" title="Toggle Theme">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+          <span class="theme-text" id="theme-text">Dark</span>
+        </button>
+
+        <!-- Mobile Hamburger Button -->
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle mobile menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer Navigation Menu -->
+    <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+      <ul class="mobile-nav-list">
+        <li><a href="#hero" class="mobile-nav-link">Home</a></li>
+        <li><a href="#forecast-section" class="mobile-nav-link">Forecast</a></li>
+        <li><a href="#recent-section" class="mobile-nav-link">Recent Searches</a></li>
+        <li><a href="#about-section" class="mobile-nav-link">About</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+    <!-- Notice / Alert Banner -->
+    <section class="notification-wrapper" aria-live="polite">
+      <div id="alert-banner" class="alert-banner hidden">
+        <span class="alert-icon" id="alert-icon">⚠️</span>
+        <span class="alert-message" id="alert-message">Notice message goes here</span>
+        <button type="button" class="alert-close" id="alert-close" aria-label="Close notification">&times;</button>
+      </div>
+
+      <!-- API Key Helpful Guide Banner (Shown when API key is default) -->
+      <div id="api-key-banner" class="api-key-banner hidden">
+        <div class="api-key-content">
+          <span class="key-icon">🔑</span>
+          <div class="key-text">
+            <strong>OpenWeatherMap API Key Required:</strong>
+            <span>Add your free API key to <code>script.js</code>, or click below to explore with <strong>Demo Mode</strong> (Live simulated data for Nashik, Mumbai, London, etc.)</span>
+          </div>
+        </div>
+        <div class="api-key-actions">
+          <button id="demo-mode-btn" class="btn btn-demo">Explore Demo Mode</button>
+          <button id="enter-key-btn" class="btn btn-key-input">Enter Key Here</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. Hero Section: Search & Geolocation -->
+    <section class="hero-section" id="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">What's the Weather Today? 🌤️</h1>
+        <p class="hero-subtitle">
+          Check current weather conditions and forecasts for any city around the world.
+        </p>
+
+        <!-- Search Form -->
+        <form id="search-form" class="search-form" role="search" onsubmit="return false;">
+          <div class="search-input-group">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input 
+              type="text" 
+              id="city-input" 
+              class="city-input" 
+              placeholder="Enter city name..." 
+              autocomplete="off" 
+              spellcheck="false" 
+              aria-label="City name"
+            />
+            <button type="button" id="clear-search-btn" class="clear-search-btn hidden" aria-label="Clear search input">&times;</button>
+          </div>
+          <button type="submit" id="search-btn" class="btn btn-search">
+            <span>Search</span>
+          </button>
+          <button type="button" id="location-btn" class="btn btn-location" title="Detect your current location">
+            <span class="btn-icon">📍</span>
+            <span>Use My Location</span>
+          </button>
+        </form>
+
+        <!-- Popular City Quick Search Chips -->
+        <div class="popular-cities">
+          <span class="popular-label">Popular:</span>
+          <div class="popular-chips">
+            <button type="button" class="chip-btn" data-city="Nashik">Nashik</button>
+            <button type="button" class="chip-btn" data-city="Mumbai">Mumbai</button>
+            <button type="button" class="chip-btn" data-city="Pune">Pune</button>
+            <button type="button" class="chip-btn" data-city="Delhi">Delhi</button>
+            <button type="button" class="chip-btn" data-city="London">London</button>
+            <button type="button" class="chip-btn" data-city="Tokyo">Tokyo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Loading State Indicator -->
+    <section id="loading-container" class="loading-container hidden" aria-live="polite">
+      <div class="loading-spinner-box">
+        <div class="weather-loader-icon">🌤️</div>
+        <p class="loading-text">Getting the latest weather...</p>
+        <div class="loading-progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Current Weather Section -->
+    <section class="current-section" id="current-section">
+      <div class="weather-card glassmorphism" id="weather-card">
+        <!-- Weather Card Header -->
+        <div class="card-header">
+          <div class="location-box">
+            <h2 class="city-name" id="city-name">Nashik, India</h2>
+            <p class="date-time" id="date-time">Thursday, Oct 1, 2026 | 06:45 PM</p>
+          </div>
+          <div class="condition-badge" id="condition-badge">
+            <span id="badge-condition-text">Partly Cloudy</span>
+          </div>
+        </div>
+
+        <!-- Weather Card Main Display -->
+        <div class="card-main">
+          <div class="weather-visual">
+            <div class="icon-wrapper">
+              <img id="weather-icon" src="https://openweathermap.org/img/wn/02d@4x.png" alt="Weather condition icon" class="weather-icon-img" />
+            </div>
+            <p class="weather-condition-desc" id="weather-condition">Partly Cloudy</p>
+          </div>
+
+          <div class="temperature-visual">
+            <div class="temp-display">
+              <span class="temp-number" id="temperature">28</span>
+              <span class="temp-symbol" id="temp-unit-symbol">°C</span>
+            </div>
+            <p class="feels-like" id="feels-like">Feels like: 30°C</p>
+            <div class="temp-minmax" id="temp-minmax">
+              <span>H: <strong id="temp-max">31°C</strong></span>
+              <span class="separator">•</span>
+              <span>L: <strong id="temp-min">22°C</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weather Card Metrics Grid -->
+        <div class="weather-details-grid">
+          <div class="detail-card">
+            <div class="detail-icon">💧</div>
+            <div class="detail-info">
+              <span class="detail-label">Humidity</span>
+              <span class="detail-value" id="humidity">65%</span>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-icon">💨</div>
+            <div class="detail-info">
+              <span class="detail-label">Wind</span>
+              <span class="detail-value" id="wind-speed">12 km/h</span>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-icon">🌡️</div>
+            <div class="detail-info">
+              <span class="detail-label">Pressure</span>
+              <span class="detail-value" id="pressure">1012 hPa</span>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-icon">👁️</div>
+            <div class="detail-info">
+              <span class="detail-label">Visibility</span>
+              <span class="detail-value" id="visibility">10 km</span>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-icon">☁️</div>
+            <div class="detail-info">
+              <span class="detail-label">Cloudiness</span>
+              <span class="detail-value" id="cloudiness">40%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 5-Day Forecast Section -->
+    <section class="forecast-section" id="forecast-section">
+      <div class="section-header">
+        <h2 class="section-title">5-Day Forecast</h2>
+        <p class="section-subtitle">Upcoming weather outlook for the next 5 days</p>
+      </div>
+
+      <!-- Forecast Cards Grid / Carousel -->
+      <div class="forecast-cards-container" id="forecast-cards-container">
+        <!-- 5 forecast cards will be dynamically rendered here by script.js -->
+        <div class="forecast-card glassmorphism skeleton">
+          <span class="forecast-day">Loading...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Recent Searches Section -->
+    <section class="recent-section" id="recent-section">
+      <div class="section-header">
+        <div class="title-with-action">
+          <h2 class="section-title">Recent Searches</h2>
+          <button type="button" id="clear-recent-btn" class="btn-clear-recent" title="Clear search history">Clear History</button>
+        </div>
+        <p class="section-subtitle">Quickly re-visit weather for your recent places</p>
+      </div>
+
+      <div class="recent-searches-container">
+        <div class="recent-tags-list" id="recent-searches-list">
+          <!-- Recent search buttons populated dynamically -->
+          <span class="no-recent-text">No recent searches yet. Search for a city above!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. About Section -->
+    <section class="about-section" id="about-section">
+      <div class="about-card glassmorphism">
+        <div class="about-header">
+          <div class="about-badge">About Project</div>
+          <h2 class="about-title">Weather App</h2>
+        </div>
+        <p class="about-description">
+          Weather App is a frontend web application that provides current weather information and short-term forecasts for cities around the world.
+        </p>
+
+        <div class="tech-stack-container">
+          <h3 class="tech-stack-title">Technologies Used</h3>
+          <div class="tech-tags-grid">
+            <div class="tech-tag">
+              <span class="tag-dot html"></span>
+              <strong>HTML5</strong>
+              <small>Semantic layout</small>
+            </div>
+            <div class="tech-tag">
+              <span class="tag-dot css"></span>
+              <strong>CSS3</strong>
+              <small>Glassmorphism & Flex/Grid</small>
+            </div>
+            <div class="tech-tag">
+              <span class="tag-dot js"></span>
+              <strong>JavaScript</strong>
+              <small>ES6+ Vanilla logic</small>
+            </div>
+            <div class="tech-tag">
+              <span class="tag-dot fetch"></span>
+              <strong>Fetch API</strong>
+              <small>Async data handling</small>
+            </div>
+            <div class="tech-tag">
+              <span class="tag-dot api"></span>
+              <strong>OpenWeatherMap API</strong>
+              <small>Live weather & forecasts</small>
+            </div>
+            <div class="tech-tag">
+              <span class="tag-dot storage"></span>
+              <strong>LocalStorage</strong>
+              <small>Theme & recent cities</small>
+            </div>
+            <div class="tech-tag">
+              <span class="tag-dot geo"></span>
+              <strong>Geolocation API</strong>
+              <small>Browser location detection</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-info-footer">
+          <div class="student-author-card">
+            <div class="author-avatar">SD</div>
+            <div class="author-details">
+              <strong>Sneha Dhamane</strong>
+              <span>Computer Engineering Student</span>
+            </div>
+          </div>
+          <div class="project-badge">College Frontend Project 2026</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Entering API Key Dynamically if user wants -->
+  <div id="key-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card glassmorphism">
+      <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close dialog">&times;</button>
+      <h3 id="modal-title" class="modal-title">🔑 Enter OpenWeatherMap API Key</h3>
+      <p class="modal-desc">
+        Enter your API key below or update <code>const API_KEY = "YOUR_API_KEY";</code> directly in <code>script.js</code>.
+      </p>
+      <div class="modal-input-group">
+        <input type="text" id="api-key-input" class="modal-input" placeholder="Paste 32-character API Key..." autocomplete="off" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="save-key-btn" class="btn btn-primary">Save & Apply</button>
+        <button type="button" id="cancel-key-btn" class="btn btn-secondary">Cancel</button>
+      </div>
+      <p class="modal-hint">Don't have a key? Get one free at <a href="https://openweathermap.org/api" target="_blank" rel="noopener">openweathermap.org</a>.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span>🌤️</span> <strong>Weather App</strong>
+      </div>
+      <p class="footer-copyright">
+        &copy; 2026 Weather App. Built with HTML, CSS &amp; JavaScript.
+      </p>
+      <p class="footer-author">
+        Created by <strong>Sneha Dhamane</strong>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -9,7 +9,7 @@ Designed specifically as a professional college frontend project and a standout 
 ## 📖 Description
 
 **Weather App** delivers an intuitive weather tracking experience right from your browser. Whether you are searching for your hometown, exploring weather in global metropolises, or checking local conditions using your device's GPS, this application presents comprehensive atmospheric data in an uncluttered, modern glassmorphic interface that dynamically adapts its aesthetics to current weather conditions.
-
+![App Screenshot](./layout/app-preview.png)
 ---
 
 ## ✨ Features
